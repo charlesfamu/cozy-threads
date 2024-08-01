@@ -25,7 +25,7 @@ const OrderSummary = ({ sessionData }: OrderSummary) => {
   }, [sessionData]);
 
   return (
-    <div className="bg-white shadow-md p-6 w-full">
+    <div className="bg-white mx-auto shadow-md p-6 w-2/3">
       <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">{sessionData?.customerName}, thanks for your purchase!</h1>
       <p className="text-center text-gray-600 mb-6">We will deliver your order confirmation to {sessionData?.customerEmail} shortly.</p>
       <div className="border-t border-gray-200 pt-2">

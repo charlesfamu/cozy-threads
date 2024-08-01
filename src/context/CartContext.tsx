@@ -335,6 +335,8 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
     if (cozyThreadsCart) {
       window.localStorage.removeItem(localStorageKey);
     }
+    setCart(null);
+    setItemsInCartCount(0);
   };
 
   const saveCartToLocalStorage = () => {
