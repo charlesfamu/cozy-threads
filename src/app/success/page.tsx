@@ -17,25 +17,12 @@ interface SessionData {
 }
 
 const Success = () => {
-  const [sessionData, setSessionData] = useState<SessionData>();
-  const [timedOut, setTimedOut] = useState<boolean>(false);
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const searchParams = useSearchParams();
-  const { deleteCartFromLocalStorage } = useCart();
+  const { cart, clearCart } = useCart();
 
-  useEffect(() => {
-    setTimeout(() => {
-      setTimedOut(true);
-    }, 10000);
-  },[]);
-
-  useEffect(() => {
-    // clear the shoppingg cart
-    if (sessionData?.status === 'complete') {
-      deleteCartFromLocalStorage();
-    }
-  },[sessionData, deleteCartFromLocalStorage]);
-
-  const getSessionData = useCallback(async () => {
+  const fetchSessionData = useCallback(async () => {
     const sessionId = searchParams?.get('session_id');
     if (!sessionId) return;
 
@@ -50,25 +37,36 @@ const Success = () => {
       if (response.ok) {
         const data: SessionData = await response.json();
         setSessionData(data);
+        setLoading(false);
       } else {
-        console.error('Failed to fetch session data');
+        throw new Error('Failed to fetch session data');
       }
     } catch (error) {
       console.error('Error fetching session data:', error);
+      setLoading(false);
     }
   }, [searchParams]); 
 
   useEffect(() => {
-    getSessionData();
-  }, [getSessionData]);
+    fetchSessionData();
+  }, [fetchSessionData]);
+
+  useEffect(() => {
+    // clear the shopping cart
+    if (sessionData?.status === 'complete' && cart.length) {
+      clearCart();
+    }
+  },[sessionData, clearCart, cart]);
+
+  if (loading) {
+    return <Loader text='Preparing Order Summary' />
+  }
 
   if (sessionData?.status === 'complete') {
     return <OrderSummary sessionData={sessionData} />;
-  } else if (!sessionData && !timedOut) {
-    return <Loader text={'Preparing Order Summary'} />;
-  } else if (timedOut) {
-    return <NoOrder />;
   }
+  
+  return <NoOrder />;
 }
 
 export default Success;

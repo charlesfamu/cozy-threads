@@ -260,10 +260,11 @@ export interface CartItem extends Product {
 }
 
 export interface CartContextType {
-  cart: CartItem[] | null;
+  cart: CartItem[];
   itemsInCartCount: number;
+  loading: boolean;
   addToCart: (item: CartItem) => void;
-  deleteCartFromLocalStorage: () => void;
+  clearCart: () => void;
   removeFromCart: (item: CartItem) => void;
   saveCartToLocalStorage: () => void;
 }
@@ -273,8 +274,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const localStorageKey = 'cozy_threads';
 
 export const CartProvider = ({children}: {children: ReactNode}) => {
-  const [cart, setCart] = useState<CartContextType['cart']>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [itemsInCartCount, setItemsInCartCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const cozyThreadsCart = window.localStorage.getItem(localStorageKey);
@@ -283,26 +285,27 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
       setCart(storageCart);
       setItemsInCartCount(storageCount);
     }
+    setLoading(false);
   },[]);
 
   useEffect(() => {
-    if (cart?.length) {
+    if (cart.length) {
       window.localStorage.setItem(localStorageKey, JSON.stringify({cart, itemsInCartCount}));
     } else {
-      deleteCartFromLocalStorage();
+      window.localStorage.removeItem(localStorageKey);
     }
   }, [cart, itemsInCartCount]);
 
   const addToCart = (cartItem: CartItem) => {
     setCart((prevCart) => {
       let itemFound = false;
-      const updatedCart = prevCart?.map(item => {
+      const updatedCart = prevCart.map(item => {
         if (item.id === cartItem.id) {
           itemFound = true;
           return { ...item, quantity: item.quantity + 1 };
         }
         return item;
-      }) ?? [];
+      });
   
       if (!itemFound) {
         updatedCart.push({ ...cartItem, quantity: 1 });
@@ -317,7 +320,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
     setItemsInCartCount((prevCount) => prevCount - 1);
     setCart((prevCart) => {
       const updatedCart: CartItem[] = [];
-      prevCart?.forEach(item => {
+      prevCart.forEach(item => {
         if (item.id === cartItem.id) {
           if (item.quantity > 1) {
             updatedCart.push({ ...item, quantity: item.quantity - 1 });
@@ -330,12 +333,9 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
     })
   };
 
-  const deleteCartFromLocalStorage = () => {
-    const cozyThreadsCart = window.localStorage.getItem(localStorageKey);
-    if (cozyThreadsCart) {
-      window.localStorage.removeItem(localStorageKey);
-    }
-    setCart(null);
+  const clearCart = () => {
+    window.localStorage.removeItem(localStorageKey);
+    // setCart([]);
     setItemsInCartCount(0);
   };
 
@@ -344,7 +344,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
   };
 
   return (
-    <CartContext.Provider value={{addToCart, cart, deleteCartFromLocalStorage, itemsInCartCount, removeFromCart, saveCartToLocalStorage}}>
+    <CartContext.Provider value={{addToCart, cart, clearCart, itemsInCartCount, loading, removeFromCart, saveCartToLocalStorage}}>
       {children}
     </CartContext.Provider>
   );

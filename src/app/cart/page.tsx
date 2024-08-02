@@ -8,9 +8,10 @@ import { useCart } from '@/context/CartContext';
 const Cart = () => {
   const { ...cartContextProps } = useCart();
 
-  if (cartContextProps.cart === null) {
-    return <Loader text={'Loading Cart'} />;
-  } else if (cartContextProps.itemsInCartCount > 0) {
+  if (cartContextProps.loading) {
+    return <Loader text='Loading Cart'/>;
+  }
+  if (cartContextProps.itemsInCartCount > 0) {
     return <ShoppingCart {...cartContextProps} />;
   }
 
@@ -18,3 +19,4 @@ const Cart = () => {
 };
 
 export default Cart;
+
