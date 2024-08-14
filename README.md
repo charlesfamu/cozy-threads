@@ -6,12 +6,14 @@ Cozy threads is a direct-to-consumer ecommerce brand selling high-quality, ethic
 
 ## Live Demo
 
--   https://cozy-threads-psi.vercel.app/
+https://cozy-threads-psi.vercel.app/
 
 ## Features
 
 **Product Catalog:** Displays a list of Cozy Threads' products with images, titles, descriptions, and prices.
+
 **Shopping Cart:** Allows customers to add products to a shopping cart and view selected items.
+
 **Checkout Flow:** Integrates with Stripe to securely collect payment information and complete transactions. Displays the result to the customer.
 
 ## Technologies Used
